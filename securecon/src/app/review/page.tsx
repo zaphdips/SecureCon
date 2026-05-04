@@ -13,21 +13,12 @@ export default function ReviewPage() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<EvalResult | null>(null)
   const [error, setError] = useState('')
-  const [apiKey, setApiKey] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     const savedSpec = localStorage.getItem('securecon-project')
     if (savedSpec) { try { setSpec(JSON.parse(savedSpec)) } catch {} }
-
-    const savedKey = localStorage.getItem('securecon-gemini-key')
-    if (savedKey) { setApiKey(savedKey) }
   }, [])
-
-  const saveApiKey = (key: string) => {
-    setApiKey(key)
-    localStorage.setItem('securecon-gemini-key', key)
-  }
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -58,7 +49,7 @@ export default function ReviewPage() {
       const res = await fetch('/api/review', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, spec: spec || {}, fileName, apiKey })
+        body: JSON.stringify({ code, spec: spec || {}, fileName })
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Review failed')
@@ -84,23 +75,6 @@ export default function ReviewPage() {
         <div className="page-header animate-in">
           <h1>Code Review</h1>
           <p>Paste code or upload a file. Gemini evaluates it against {spec?.name ? `your "${spec.name}" spec` : 'security best practices'}.</p>
-        </div>
-
-        <div className="card animate-in" style={{ animationDelay: '0.05s', background: 'var(--bg-off-white)', border: '1px dashed var(--border-strong)', padding: '1.25rem 1.5rem', marginBottom: '1.5rem' }}>
-          <div className="card-title" style={{ fontSize: 13, marginBottom: '0.5rem' }}>🔑 (Optional) Enter Your Google Gemini API Key</div>
-          <div className="field" style={{ marginBottom: 8 }}>
-            <input 
-              type="password" 
-              value={apiKey} 
-              onChange={(e) => saveApiKey(e.target.value)} 
-              placeholder="AIzaSy..." 
-              style={{ maxWidth: '100%', fontSize: 13, padding: '10px 14px' }}
-            />
-          </div>
-          <p className="text-sm text-muted" style={{ fontSize: 11, lineHeight: 1.4 }}>
-            <strong>Privacy Guarantee:</strong> Your key is only saved in your browser's local storage.
-            It is passed securely via the API request for evaluation and is <strong>never stored or logged</strong> on the server.
-          </p>
         </div>
 
         {!spec && (
