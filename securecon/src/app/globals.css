@@ -871,37 +871,52 @@ textarea {
   }
 
   .builder-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
     gap: 1.5rem;
   }
 
   .preview-pane {
-    position: relative;
-    top: 0;
-    height: auto;
+    position: relative !important;
+    top: 0 !important;
+    height: 350px !important;
+    max-height: 350px !important;
+    overflow-y: auto !important;
+    margin-top: 1.5rem;
+  }
+
+  .field-row {
+    grid-template-columns: 1fr !important;
+    gap: 1rem;
   }
 
   .tab-bar {
     padding: 4px;
     gap: 4px;
     border-radius: 10px;
+    display: flex;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
   }
 
   .tab {
     font-size: 0.75rem;
-    padding: 6px 10px;
+    padding: 8px 12px;
+    flex: 0 0 auto !important;
   }
 
   .toggle-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 
   .presets-row {
     gap: 1rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .preset-card {
-    flex: 0 0 200px;
+    flex: 0 0 220px !important;
     padding: 1rem;
   }
 
@@ -914,10 +929,12 @@ textarea {
   .btn-row {
     flex-direction: column;
     width: 100%;
+    gap: 0.75rem;
   }
 
   .card {
     padding: 1.25rem;
   }
 }
+
 
