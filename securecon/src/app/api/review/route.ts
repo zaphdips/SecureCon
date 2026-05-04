@@ -1,4 +1,3 @@
-import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { ProjectSpec } from '@/lib/types'
 
@@ -13,12 +12,10 @@ export async function POST(req: NextRequest) {
   const { code, spec, apiKey } = body
   if (!code?.trim()) return NextResponse.json({ error: 'No code provided.' }, { status: 400 })
 
-  const finalKey = apiKey || process.env.ANTHROPIC_API_KEY
+  const finalKey = apiKey || process.env.GEMINI_API_KEY || 'AIzaSyD38snDDInvVd5IUAwpwTc3F3NOIofPQKY'
   if (!finalKey) {
-    return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured on server or provided in request.' }, { status: 401 })
+    return NextResponse.json({ error: 'GEMINI_API_KEY not configured on server.' }, { status: 401 })
   }
-
-  const client = new Anthropic({ apiKey: finalKey })
 
   const testList = spec?.tests?.map((t, i) => `${i+1}. [${t.cat.toUpperCase()}] ${t.name}: ${t.desc}`).join('\n') || 'Use general security best practices.'
 
@@ -44,17 +41,34 @@ Respond ONLY with a JSON object, no preamble, no markdown fences. Structure:
   ],
   "blockers": ["<list of critical issues that must be fixed before shipping>"],
   "summary": "<2-3 sentence plain English summary for a technical PM>"
-}`
+}
+
+Here is the code to review:
+${code.slice(0, 8000)}`
 
   try {
-    const response = await client.messages.create({
-      model: 'claude-3-5-sonnet-20240620',
-      max_tokens: 1500,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: `Review this code:\n\n${code.slice(0, 8000)}` }]
-    })
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${finalKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{ text: systemPrompt }]
+          }],
+          generationConfig: {
+            responseMimeType: 'application/json'
+          }
+        })
+      }
+    )
 
-    const text = response.content.find(b => b.type === 'text')?.text || ''
+    const data = await response.json()
+    if (!response.ok) {
+      throw new Error(data.error?.message || 'Gemini API failed')
+    }
+
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
     const clean = text.replace(/```json|```/g, '').trim()
 
     let result
@@ -67,6 +81,6 @@ Respond ONLY with a JSON object, no preamble, no markdown fences. Structure:
     return NextResponse.json(result)
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: `Anthropic API error: ${message}` }, { status: 500 })
+    return NextResponse.json({ error: `Gemini API error: ${message}` }, { status: 500 })
   }
 }

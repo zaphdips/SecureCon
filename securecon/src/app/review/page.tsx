@@ -20,13 +20,13 @@ export default function ReviewPage() {
     const savedSpec = localStorage.getItem('securecon-project')
     if (savedSpec) { try { setSpec(JSON.parse(savedSpec)) } catch {} }
 
-    const savedKey = localStorage.getItem('securecon-anthropic-key')
+    const savedKey = localStorage.getItem('securecon-gemini-key')
     if (savedKey) { setApiKey(savedKey) }
   }, [])
 
   const saveApiKey = (key: string) => {
     setApiKey(key)
-    localStorage.setItem('securecon-anthropic-key', key)
+    localStorage.setItem('securecon-gemini-key', key)
   }
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,17 +83,17 @@ export default function ReviewPage() {
       <div className="container">
         <div className="page-header animate-in">
           <h1>Code Review</h1>
-          <p>Paste code or upload a file. Claude evaluates it against {spec?.name ? `your "${spec.name}" spec` : 'security best practices'}.</p>
+          <p>Paste code or upload a file. Gemini evaluates it against {spec?.name ? `your "${spec.name}" spec` : 'security best practices'}.</p>
         </div>
 
         <div className="card animate-in" style={{ animationDelay: '0.05s', background: 'var(--bg-off-white)', border: '1px dashed var(--border-strong)', padding: '1.25rem 1.5rem', marginBottom: '1.5rem' }}>
-          <div className="card-title" style={{ fontSize: 13, marginBottom: '0.5rem' }}>🔑 Enter Your Anthropic API Key</div>
+          <div className="card-title" style={{ fontSize: 13, marginBottom: '0.5rem' }}>🔑 (Optional) Enter Your Google Gemini API Key</div>
           <div className="field" style={{ marginBottom: 8 }}>
             <input 
               type="password" 
               value={apiKey} 
               onChange={(e) => saveApiKey(e.target.value)} 
-              placeholder="sk-ant-api03-..." 
+              placeholder="AIzaSy..." 
               style={{ maxWidth: '100%', fontSize: 13, padding: '10px 14px' }}
             />
           </div>
